@@ -62,11 +62,10 @@ public class Store {
 
     /** 이미 저장된 건이 원본에서 갱신됐을 때 (상호 변경, 폐업 등) */
     public void update(String name, String category, String roadAddr,
-                       String lotAddr, String statusCd, LocalDateTime srcUpdatedAt) {
+                       String statusCd, LocalDateTime srcUpdatedAt) {
         this.name = name;
         this.category = category;
         this.roadAddr = roadAddr;
-        this.lotAddr = lotAddr;
         this.statusCd = statusCd;
         this.srcUpdatedAt = srcUpdatedAt;
     }

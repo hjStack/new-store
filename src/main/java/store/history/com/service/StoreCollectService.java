@@ -75,15 +75,13 @@ public class StoreCollectService {
                     if (!existing.getSrcUpdatedAt().isBefore(c.srcUpdatedAt())) {
                         return false;   // 이미 최신이면 건너뜀
                     }
-                    existing.update(c.name(), c.category(), c.roadAddr(),
-                            c.lotAddr(), c.statusCd(), c.srcUpdatedAt());
+                    existing.update(c.name(), c.category(), c.roadAddr(), c.statusCd(), c.srcUpdatedAt());
                     return true;
                 })
                 .orElseGet(() -> {
                     storeRepository.save(Store.builder()
                             .mngNo(c.mngNo()).name(c.name()).category(c.category())
-                            .roadAddr(c.roadAddr()).lotAddr(c.lotAddr())
-                            .permitDate(c.permitDate()).statusCd(c.statusCd())
+                            .permitDate(LocalDate.parse(c.permitDate())).statusCd(c.statusCd())
                             .srcUpdatedAt(c.srcUpdatedAt())
                             .build());
                     return true;

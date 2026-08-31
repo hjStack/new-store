@@ -54,7 +54,6 @@ public class BatchHistory {
         this.fetchedCount = fetched;
         this.savedCount = saved;
         this.lastSrcUpdatedAt = lastSrcUpdatedAt;
-        this.finishedAt = LocalDateTime.now();
     }
 
     public void fail(String message) {

@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 public class LocalDataClient {
 
     private static final DateTimeFormatter YMD = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final String BASE_URL = "https://apis.data.go.kr/1741000/general_restaurants/info";
 
     private final RestClient restClient;
     private final String authKey;
@@ -29,10 +30,8 @@ public class LocalDataClient {
         this.localCode = localCode;
     }
 
-
     public LocalDataResponse fetch(int pageNo, int numOfRows, LocalDate permitDateFrom) {
-
-        String url = "https://apis.data.go.kr/1741000/general_restaurants/history"
+        String url = BASE_URL
                 + "?serviceKey=" + authKey
                 + "&pageNo=" + pageNo
                 + "&numOfRows=" + numOfRows
@@ -41,10 +40,10 @@ public class LocalDataClient {
                 + "&cond[SALS_STTS_CD::EQ]=01"
                 + "&cond[LCPMT_YMD::GTE]=" + permitDateFrom.format(YMD);
 
-        URI uri = UriComponentsBuilder.fromUriString(url).build().toUri();
+        URI uri = URI.create(url);
 
-        System.out.println("key=" + URLEncoder.encode(authKey, StandardCharsets.UTF_8).substring(0, 20));
+        LocalDataResponse res = restClient.get().uri(uri).retrieve().body(LocalDataResponse.class);
 
-        return restClient.get().uri(uri).retrieve().body(LocalDataResponse.class);
+        return res;
     }
 }
