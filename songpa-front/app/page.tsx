@@ -10,8 +10,6 @@ type Store = {
   permitDate: string;
 };
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
-
 type CategoryMeta = {
   emoji: string;
   chip: string;
@@ -132,7 +130,7 @@ export default function Home() {
     setStatus('loading');
 
     try {
-      const response = await fetch(API + '/api/stores', { cache: 'no-store' });
+      const response = await fetch('/api/stores', { cache: 'no-store' });
 
       if (!response.ok) {
         throw new Error('API 응답이 올바르지 않습니다.');
