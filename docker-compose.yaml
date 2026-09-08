@@ -1,0 +1,46 @@
+services:
+  ounce-db:
+    image: mysql:8.0
+    container_name: new-store-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: newstore
+      TZ: Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --innodb-buffer-pool-size=96M
+      - --performance-schema=OFF
+      - --max-connections=30
+    expose:
+      - "3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+  app:
+    image: hyejun02/new-store-api:latest
+    container_name: new-store-api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_TOOL_OPTIONS: "-Xms96m -Xmx256m -XX:MaxMetaspaceSize=128m"
+      SPRING_DATASOURCE_URL: jdbc:mysql://new-store-db:3306/newstore?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      DB_HOST: new-store-db
+    depends_on:
+      ounce-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db_data:
