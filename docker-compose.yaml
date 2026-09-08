@@ -1,10 +1,12 @@
 services:
-  ounce-db:
-    image: mysql:8.0
+  new-store-db:
+    image: postgres:16-alpine
     container_name: new-store-db
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: newstore
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: newstore
+
       TZ: Asia/Seoul
     command:
       - --character-set-server=utf8mb4
@@ -15,7 +17,7 @@ services:
     expose:
       - "3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${POSTGRES_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -25,17 +27,18 @@ services:
     restart: unless-stopped
 
   app:
-    image: hyejun02/new-store-api:latest
+    image: hyejun0209/new-store-api:latest
     container_name: new-store-api
     ports:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: prod
       JAVA_TOOL_OPTIONS: "-Xms96m -Xmx256m -XX:MaxMetaspaceSize=128m"
-      SPRING_DATASOURCE_URL: jdbc:mysql://new-store-db:3306/newstore?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://new-store-db:5432/newstore?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       DB_HOST: new-store-db
     depends_on:
       ounce-db:
