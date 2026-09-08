@@ -45,45 +45,45 @@ jobs:
           ./mvnw clean package -DskipTests
 
       # 5. 도커 허브(Docker Hub) 로그인
-      - name: 🐳 도커 허브 로그인
-
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - - name: 🐳 도커 허브 로그인
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - uses: docker/login-action@v2
+      - with:
+      - username: ${{ secrets.DOCKER_USERNAME }}
+      - password: ${{ secrets.DOCKER_PASSWORD }}
 
       # 6. 도커 이미지 빌드 및 도커 허브로 업로드(Push)
       - name: 🚀 도커 이미지 빌드 및 푸시
-
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/ounce-api:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/ounce-api:latest
+      - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - run: |
+      - docker build -t ${{ secrets.DOCKER_USERNAME }}/new-store-api:latest .
+      - docker push ${{ secrets.DOCKER_USERNAME }}/new-store-api:latest
 
       # 7. 설정 파일을 운영 서버로 전송
       - name: 📦 설정 파일 운영 서버로 전송
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           # nginx.prod.conf 가 운영 nginx 설정입니다. nginx/nginx.conf 는 로컬용(TLS 없음)이라
           # 서버에 보내면 안 됩니다.
-          source: "docker-compose.yml,deploy.sh,nginx/nginx.prod.conf"
-          target: /home/${{ secrets.SERVER_USERNAME }}/ounce
+          source: "docker-compose.yaml,deploy.sh,nginx/nginx.prod.conf"
+          target: /home/${{ secrets.EC2_USER }}/new-store
 
       # 8. 운영 서버에 접속해서 무중단 배포 스크립트 실행
       - name: 🌐 운영 서버 접속 및 무중단 배포 실행
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           command_timeout: 20m
           script: |
             set -e
-            cd /home/${{ secrets.SERVER_USERNAME }}/ounce
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ounce-api:latest
+            cd /home/${{ secrets.EC2_USER }}/new-store
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/new-store-api:latest
             chmod +x ./deploy.sh
             ./deploy.sh
