@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: local-db
+    environment:
+      POSTGRES_USER: newstore
+      POSTGRES_PASSWORD: newstore
+      POSTGRES_DB: newstore
+      DATASOURCE_URL : jdbc:postgresql://localhost:5432/postgres
+      TZ: Asia/Seoul
+    ports:
+      - "5432:5432"
+    volumes:
+      - local_db:/var/lib/postgresql/data
+
+volumes:
+  local_db:
